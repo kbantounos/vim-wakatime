@@ -848,17 +848,29 @@ call s:InstallCLI(s:true)
 
 " Autocommand Events {{{
 
-    augroup Wakatime
-        autocmd BufEnter,VimEnter * call s:InitAndHandleActivity(s:false)
-        autocmd CursorMoved,CursorMovedI * call s:HandleActivity(s:false)
-        autocmd BufWritePost * call s:HandleActivity(s:true)
-        if exists('##QuitPre')
-            autocmd QuitPre * call s:SendHeartbeats()
-        endif
-    augroup END
+    " [key bindings - How to enable/disable an augroup on the fly? - Vi and Vim Stack Exchange](https://vi.stackexchange.com/questions/4120/how-to-enable-disable-an-augroup-on-the-fly)
+    function! s:WakaTimeAutocmdsOn()
+        augroup Wakatime
+            autocmd!
+            autocmd BufEnter,VimEnter * call s:InitAndHandleActivity(s:false)
+            autocmd CursorMoved,CursorMovedI * call s:HandleActivity(s:false)
+            autocmd BufWritePost * call s:HandleActivity(s:true)
+            if exists('##QuitPre')
+                autocmd QuitPre * call s:SendHeartbeats()
+            endif
+        augroup END
+    endfunction
+
+    function! s:WakaTimeAutocmdsOff()
+        augroup Wakatime
+            autocmd!
+        augroup END
+    endfunction
 
 " }}}
 
+" Enable on startup
+call s:WakaTimeAutocmdsOn()
 
 " Plugin Commands {{{
 
@@ -870,6 +882,9 @@ call s:InstallCLI(s:true)
     :command -nargs=0 WakaTimeScreenRedrawEnableAuto call s:EnableScreenRedrawAuto()
     :command -nargs=0 WakaTimeToday call g:WakaTimeToday()
 
+    :command -nargs=0 WakaTimeMonitorEnable call s:WakaTimeAutocmdsOn()
+    :command -nargs=0 WakaTimeMonitorDisable call s:WakaTimeAutocmdsOff()
+    
 " }}}
 
 
